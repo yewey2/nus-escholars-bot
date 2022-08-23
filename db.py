@@ -11,9 +11,8 @@ import datetime
 import json
 
 # Use a service account
-cred = credentials.Certificate('./serviceAccountKey.json')
-# d = json.loads(os.environ.get('DB_CREDENTIALS'))
-# cred = credentials.Certificate(d)
+# cred = credentials.Certificate('./serviceAccountKey.json')
+cred = credentials.Certificate(json.loads(os.environ.get('DB_CREDENTIAL')))
 firebase_admin.initialize_app(cred)
 
 client = firestore.client()
@@ -27,7 +26,7 @@ def new_user(username, name="John Doe", chat_id=-1):
         # data here
         'name':name,
         'chat_id':chat_id,
-        'username':'johndoe123',
+        'username':username,
         'chat_with': 0
     })
     return db.document(username).get()
@@ -50,3 +49,6 @@ def get_chat_id(username):
 def update_chat_id(username,chat_id):
     user = get_user(username)
     user.reference.update({'chat_id':chat_id})
+
+if __name__ == '__main__':
+    get_chat_id('fluffballz')
