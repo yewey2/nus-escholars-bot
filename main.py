@@ -7,6 +7,8 @@ from telegram.ext import (
 
 # from telegram import ()
 
+import db
+
 import random
 import datetime
 import os
@@ -27,6 +29,8 @@ def start_command(update,context):
     context.bot.send_message(
         chat_id=update.effective_chat.id,
         text=text)
+    if update.effective_chat.id > 0:
+        db.update_chat_id(update.effective_chat.username, update.effective_chat.id)
 
 dispatcher.add_handler(CommandHandler('start', start_command))
 
@@ -41,6 +45,45 @@ def scheduler(job, updater, time):
 
 # TODO: Add in a database to manage E-Scholars pairings for Angel & Mortal
 # TODO: Include functions for E-Scholars to chat with each other
+
+def message_forward(update,context):
+    user = db.get_user(update.effective_chat.username)
+    if not user:
+        context.bot.send_message(
+            text="Sorry, you're not registered as a participant in Angel & Mortal",
+            chat_id=update.effective_chat.id
+        )
+        return
+    if not user.get('chat_with') == '':
+        context.bot.send_message(
+            text="Sorry, please select who to chat with first!",
+            chat_id=update.effective_chat.id
+        )
+        return
+    elif user.get('chat_with') == 'mortal':
+        mortal_chat_id = db.get_chat_id(user.get('mortal_username'))
+        if not mortal_chat_id:
+            context.bot.send_message(
+                text="Sorry, your mortal has not started the chat yet... ",
+                chat_id=update.effective_chat.id
+            )
+        context.bot.send_message(
+            text='Your angel says: ' + update.message.text,
+            chat_id=mortal_chat_id
+        )
+    elif user.get('chat_with') == 'angel':
+        angel_chat_id = db.get_chat_id(user.get('angel_username'))
+        if not angel_chat_id:
+            context.bot.send_message(
+                text="Sorry, your angel has not started the chat yet... ",
+                chat_id=update.effective_chat.id
+            )
+        context.bot.send_message(
+            text='Your mortal says: ' + update.message.text,
+            chat_id=angel_chat_id
+        )
+
+dispatcher.add_handler(MessageHandler(~Filters.command & Filters.text, message_forward))
 
 if __name__ == "__main__":
     print('Starting main!')
