@@ -2,15 +2,18 @@ from Player import Player
 
 class PlayersMap:
     def __init__(self, players):
-        if type(players) is str:
-            players = self.get_players_from_string(players)
-            self.players_map = {player.get_username(): player for player in players}
-        elif type(players) is list:
-            self.players_map = {player.get_username(): player for player in players}
-        elif type(players) is dict:
-            self.players_map = players.copy()
+        if players:
+            if type(players) is str:
+                players = self.get_players_from_string(players)
+                self.players_map = {player.get_username(): player for player in players}
+            elif type(players) is list:
+                self.players_map = {player.get_username(): player for player in players}
+            elif type(players) is dict:
+                self.players_map = players.copy()
+            else:
+                raise TypeError("Only strings, lists, or dictionaries are allowed.")
         else:
-            raise TypeError("Only strings, lists, or dictionaries are allowed.")
+            raise AssertionError("Players cannot be empty!")
 
     def get_players_map(self):
         """Returns a copy such that the original dict is not mutated"""
