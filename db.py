@@ -1,6 +1,14 @@
 import gspread
+import json
+import os
 
-service_account = gspread.service_account(filename="googleServiceAccount.json")
+# service_account = gspread.service_account(filename="googleServiceAccount.json")
+
+with open('newServiceAccount.json', 'w') as f:
+    data = json.loads(os.environ.get('GOOGLE_KEY'))
+    json.dump(data, f, indent=4)
+
+service_account = gspread.service_account('newServiceAccount.json')
 workbook = service_account.open("e-scholar-bot-users")
 sheet = workbook.worksheet("Sheet1")
 
